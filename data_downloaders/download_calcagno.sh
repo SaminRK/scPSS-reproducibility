@@ -8,6 +8,7 @@ fi
 
 # Input argument
 DATA_DIR="$1"
+DATA_DIR="$(realpath "$DATA_DIR")"
 
 # Create directory
 mkdir -p "$DATA_DIR"
