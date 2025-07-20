@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Exit if any command fails
-set -e
-
 # Check for input argument
 if [ -z "$1" ]; then
     echo "Usage: $0 /path/to/DATA_DIR"
@@ -36,5 +33,17 @@ wget -c "$METADATA_URL" -O "$ZIP_OUTPUT"
 
 echo "==> Unzipping Zenodo ZIP..."
 unzip -o "$ZIP_OUTPUT" -d "$DATA_DIR"
+
+mv "$DATA_DIR"/Nikatag-Single-Cell-Spatial-Transcriptomics-for-Border-zone-*/* "$DATA_DIR"/
+
+echo "==> Flattening filtered_feature_bc_matrix folders..."
+
+find "$DATA_DIR" -type d -name "filtered_feature_bc_matrix" | while read -r ffbm_dir; do
+    parent_dir="$(dirname "$ffbm_dir")"
+    echo "  Moving contents of $ffbm_dir to $parent_dir"
+    mv "$ffbm_dir"/* "$parent_dir"/
+    rmdir "$ffbm_dir"
+done
+
 
 echo "✅ Done. Files are in: $DATA_DIR"
