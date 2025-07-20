@@ -1,17 +1,15 @@
-ROOT_PATH = '/content/drive/MyDrive/Research - Sohel sir/Pathological Cells/Pathological Cell Identification/data/Infracted Heart Border Zone - GSE214611_RAW'
-
 import scanpy as sc
 import pandas as pd
 import anndata as AD
 
 
-metadata_sc = pd.read_csv(f'{ROOT_PATH}/sn_wc_object_integrated@meta.data.csv', index_col=0)
-metadata_sc_t = metadata_sc.rename(index=lambda x: x.split('_')[0])
-metadata_sc_t['obs_names'] = metadata_sc_t.index
+def load_raw_anndata(mtx_path_id, metadata_orig_id, root_path):
+    metadata_sc = pd.read_csv(f'{root_path}/sn_wc_object_integrated@meta.data.csv', index_col=0)
+    metadata_sc_t = metadata_sc.rename(index=lambda x: x.split('_')[0])
+    metadata_sc_t['obs_names'] = metadata_sc_t.index
 
-def load_raw_anndata(mtx_path_id, metadata_orig_id):
-    PATH = f'{ROOT_PATH}/{mtx_path_id}'
-    ad = sc.read_10x_mtx(PATH)
+    mtx_path = f'{root_path}/{mtx_path_id}'
+    ad = sc.read_10x_mtx(mtx_path)
     ad.obs = ad.obs.rename(index=lambda x: x.split('-')[0])
     A = metadata_sc_t[metadata_sc_t['orig.ident'] == metadata_orig_id]
 
@@ -143,15 +141,15 @@ def get_mtx_path_id_metadata_orig_id(problem_key):
 imp_celltypes = ['Ankrd1', 'Xirp2', 'Myh6']
 
 
-def get_preprocessed_anndata(PROBLEM_KEY, n_top_genes=5_000):
+def get_preprocessed_anndata(problem_key, root_path, n_top_genes=5_000):
 
-    exp_meta_keys = get_mtx_path_id_metadata_orig_id(PROBLEM_KEY)
+    exp_meta_keys = get_mtx_path_id_metadata_orig_id(problem_key)
 
     adatas = {}
 
     for key, item in exp_meta_keys.items():
         for i, (mtx_path_id, metadata_orig_id) in enumerate(item):
-            ad = preprocess_anndata(load_raw_anndata(mtx_path_id, metadata_orig_id))
+            ad = preprocess_anndata(load_raw_anndata(mtx_path_id, metadata_orig_id, root_path))
             ad = ad[ad.obs['final_cluster'].isin(imp_celltypes)]
             dataset_id = f"{key}_{i+1}"
             ad.obs['sample'] = dataset_id
