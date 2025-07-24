@@ -42,6 +42,7 @@ def preprocess_anndata(ad, n_top_genes=None, plot=False):
         sc.pp.highly_variable_genes(ad, n_top_genes=n_top_genes)
         ad.raw = ad
         ad = ad[:, ad.var.highly_variable]
+        ad.layers['counts'] = ad.layers['counts'][:, ad.var.highly_variable]
 
     if plot:
         sc.pl.highly_variable_genes(ad)
